@@ -15,6 +15,11 @@ export function wpClient(authenticated: boolean) {
   const headers: Record<string, string> = {};
 
   if (authenticated) {
+    console.log("wpClient(auth):", {
+      hasAuth: Boolean(process.env.WP_BASIC_AUTH_BASE64),
+      authLen: (process.env.WP_BASIC_AUTH_BASE64 || "").length,
+    });
+
     const auth = process.env.WP_BASIC_AUTH_BASE64;
 
     if (!auth) {
