@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { router as baseRouter } from "./routes/index.js";
 import { router as apiRouter } from "./routes/api/index.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
@@ -15,6 +16,8 @@ app.use(express.json());
 // Mount routes
 app.use(baseRouter);
 app.use("/api", apiRouter);
+
+app.use(errorHandler);
 
 const port = Number(process.env.PORT ?? 4000);
 
