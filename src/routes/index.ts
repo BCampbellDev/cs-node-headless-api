@@ -11,7 +11,7 @@ router.get("/health", (_req, res) => {
   res.json({ ok: true });
 });
 
-router.get("/debug/viewer", async (_req, res) => {
+router.get("/debug/wp-viewer", async (_req, res) => {
   try {
     const data = await wpClient(true).request(`query { viewer { username databaseId } }`);
     res.json(data);
