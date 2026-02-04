@@ -1,29 +1,30 @@
 # CS Node Headless API
 
-This project is a **Node.js + TypeScript backend API** that acts as a middle layer between a **headless WordPress (WPGraphQL)** backend and future frontend clients (Next.js, React, etc).
+This project is a **Node.js + TypeScript backend API** that acts as a gateway between external data sources and a **headless WordPress (WPGraphQL)** backend.
 
-It exists as a **learning and case-study project** focused on:
+It exists as a **case-study / learning project** focused on:
 - Node.js fundamentals
 - Express routing & middleware
-- Consuming a GraphQL API from Node
-- Exposing a clean REST-style API on top of GraphQL
+- Consuming REST and GraphQL APIs from Node
+- Exposing a clean REST-style API
 - Authentication handoff (Basic Auth → WPGraphQL)
+- Data synchronization (external API → WordPress)
 - API hygiene (validation, pagination, error handling)
 
 ---
 
 ## Architecture Overview
 
-Client  
+External APIs (NPS Alerts)  
 ↓  
-Node.js API (Express)  
+Node.js API (Express / TypeScript)  
 ↓  
-WPGraphQL (WordPress)  
+WPGraphQL (Headless WordPress)  
 ↓  
 WordPress Database  
 
-This API does **not** store data itself.  
-It fetches data from WordPress via GraphQL, reshapes it, enforces limits, and exposes predictable REST endpoints.
+This API acts as a **gateway and data pipeline**, not a database.
+It fetches, normalizes, and upserts data into WordPress.
 
 ---
 
@@ -33,8 +34,9 @@ It fetches data from WordPress via GraphQL, reshapes it, enforces limits, and ex
 - TypeScript
 - Express
 - WPGraphQL
+- graphql-request
 - dotenv
-- fetch (Undici)
+- Undici (fetch)
 - WordPress Application Passwords
 
 ---
@@ -45,14 +47,14 @@ Create a `.env` file:
 
 ```env
 PORT=4000
+
+# WordPress
 WP_GRAPHQL_URL=https://cs-wordpress-headless.lndo.site/graphql
 WP_BASIC_AUTH_BASE64=base64(username:application-password)
-```
 
-Generate the auth value with:
-
-```bash
-echo -n "username:application-password" | base64
+# National Park Service
+NPS_API_KEY=your-nps-api-key
+NPS_ALERTS_URL=https://developer.nps.gov/api/v1/alerts
 ```
 
 ---
@@ -62,118 +64,26 @@ echo -n "username:application-password" | base64
 ```bash
 npm install
 npm run dev
-```
-
-Server runs at:
-
-```
-http://localhost:4000
+# or
+npm run start
 ```
 
 ---
 
-## API Routes
-
-### Resources
-
-GET:
-```
-/api/resources
-/api/resources/:id
-```
-
-Example:
-```bash
-curl http://localhost:4000/api/resources
-```
-
----
-
-### People
-
-GET:
-```
-/api/people
-/api/people/:id
-```
-
----
-
-### Groups
-
-GET:
-```
-/api/groups
-/api/groups/:id
-```
-
----
-
-## Mutations (REST → GraphQL)
-
-### Add a Person to a Group
+## NPS Alerts Sync
 
 POST:
 ```
-/api/groups/:groupId/people/:personId
+/api/alerts/sync?parkCode=cane&limit=3
 ```
 
 Example:
 ```bash
-curl -X POST http://localhost:4000/api/groups/16/people/12
+curl -X POST "http://localhost:4000/api/alerts/sync?parkCode=cane&limit=3"
 ```
-
-Response:
-```json
-{
-  "added": true,
-  "groupIds": [16],
-  "person": {
-    "databaseId": 12,
-    "title": "Bob Smith"
-  }
-}
-```
-
----
-
-## Middleware Concepts Demonstrated
-
-- Centralized async error handling
-- Global error middleware
-- CORS handling
-- Input validation
-- Auth forwarding to WPGraphQL
-
----
-
-## Pagination & Validation
-
-Client input is clamped and validated before hitting WordPress.
-
-Example helper:
-
-```ts
-clampFirst(value, fallback = 10)
-```
-
-Ensures safe numeric bounds and defaults.
-
----
-
-## Case Study Goals
-
-This project demonstrates:
-
-- Practical Node.js backend usage
-- Express routing and middleware patterns
-- GraphQL consumption from Node
-- Bridging CMS data into a modern API
-- Real-world auth and error handling
 
 ---
 
 ## Status
 
-Case study complete.  
-Paused intentionally to avoid burnout.
+Case study complete and functional.
