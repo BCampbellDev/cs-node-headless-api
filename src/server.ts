@@ -5,6 +5,7 @@ import express from "express";
 import cors from "cors";
 import { router as baseRouter } from "./routes/index.js";
 import { router as apiRouter } from "./routes/api/index.js";
+import { webhooksRouter } from "./routes/webhooks/index.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 export function createServer() {
@@ -19,6 +20,7 @@ export function createServer() {
   // Mount routes
   app.use(baseRouter);
   app.use("/api", apiRouter);
+  app.use("/webhooks", webhooksRouter);
 
   // Global error handler (must be last)
   app.use(errorHandler);
