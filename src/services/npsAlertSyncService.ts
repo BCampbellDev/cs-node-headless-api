@@ -40,21 +40,23 @@ export async function syncNpsAlerts(params: SyncParams): Promise<SyncResult> {
   }
 
   // IMPORTANT: no undefined items — build Laravel payload directly from alerts+results by index
-  const laravelAlerts: LaravelIngestAlert[] = alerts.map((a, idx) => {
+  const laravelAlerts: LaravelIngestAlert[] = alerts.flatMap((a, idx) => {
     const r = results[idx];
+    if (!r?.created) return [];
 
-    return {
-      nps_id: a.id,
-      title: a.title,
-      park_code: a.parkCode,
-      category: a.category ?? null,
-      url: a.url ?? null,
-      last_indexed_at: a.lastIndexedDate ?? null,
-      description: a.description ?? null,
-
-      wp_post_id: r?.alertId ?? null,
-      wp_status: r?.created ? "created" : "updated",
-    };
+    return [
+      {
+        nps_id: a.id,
+        title: a.title,
+        park_code: a.parkCode,
+        category: a.category ?? null,
+        url: a.url ?? null,
+        last_indexed_at: a.lastIndexedDate ?? null,
+        description: a.description ?? null,
+        wp_post_id: r.alertId ?? null,
+        wp_status: "draft",
+      },
+    ];
   });
 
   let laravel: any = null;
